@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fridge-to-Feast AI 🍳</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Kanit -->
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style> body { font-family: 'Kanit', sans-serif; } </style>
+</head>
+<body class="bg-amber-50/50 text-slate-800 min-h-screen pb-16">
+
+  <div class="max-w-3xl mx-auto px-4 py-8">
+
+    <!-- Header -->
+    <header class="text-center mb-8 space-y-2">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">
+        🥑 AI Chef Assistant 2026
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900">
+        Fridge-to-Feast <span class="text-amber-600">AI</span> 🍳
+      </h1>
+      <p class="text-slate-600 text-sm md:text-base max-w-lg mx-auto">
+        คิดเมนูไม่ออก? แค่บอกวัตถุดิบที่มีในตู้เย็น ให้ AI ช่วยรังสรรค์เมนูเด็ดพร้อมวิธีทำ!
+      </p>
+    </header>
+
+    <!-- Main Card -->
+    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl shadow-amber-200/40 border border-amber-100 mb-8 space-y-6">
+
+      <!-- Input 1: ใส่ชื่อวัตถุดิบ -->
+      <div>
+        <label for="ingredientsInput" class="block text-sm font-bold text-slate-700 mb-2">🥕 วัตถุดิบที่มีในตู้เย็น (พิมพ์ระบุได้เลย):</label>
+        <input type="text" id="ingredientsInput" placeholder="เช่น ไข่ไก่, หมูสับ, ใบกะเพรา, พริกสด" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl p-3.5 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
+      </div>
+
+      <!-- Input 2: ประเภทอาหาร -->
+      <div>
+        <label for="mealType" class="block text-sm font-bold text-slate-700 mb-2">🍲 ประเภทอาหารที่ต้องการ:</label>
+        <select id="mealType" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl p-3.5 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
+          <option value="อาหารจานเดียว ทำง่ายๆ">⏱️ อาหารจานเดียวทำง่าย (ไม่เกิน 15 นาที)</option>
+          <option value="ต้ม/แกง ร้อนๆ">🍲 เมนูต้ม / แกงร้อนๆ</option>
+          <option value="ผัด/ทอด รสเด็ด">🔥 ผัด / ทอด รสเด็ด</option>
+          <option value="อาหารคลีน สุขภาพ">🥗 อาหารคลีน / แคลอรีต่ำ</option>
+        </select>
+      </div>
+
+      <!-- Action Button -->
+      <button type="button" onclick="generateRecipe()" id="submitBtn" class="w-full bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-amber-200 transition duration-200">
+        คิดเมนูอาหารให้หน่อย! 👨‍🍳
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden text-center py-10 space-y-3">
+      <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-amber-500 border-t-transparent"></div>
+      <p class="text-slate-600 font-medium text-sm">เชฟ AI กำลังคิดค้นสูตรอาหารอร่อยๆ ให้คุณ...</p>
+    </div>
+
+    <!-- Result Display Card -->
+    <div id="resultCard" class="hidden space-y-4">
+      <div class="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-amber-100 space-y-5">
+
+        <!-- Header เมนู -->
+        <div class="border-b border-amber-100 pb-4 flex items-start justify-between gap-4">
+          <div>
+            <span id="resCategory" class="text-xs font-bold text-amber-600 bg-amber-100 px-3 py-1 rounded-full">เมนูแนะนำ</span>
+            <h2 id="resTitle" class="text-2xl font-extrabold text-slate-800 mt-2">ผัดกะเพราไข่ดาวทรงเครื่อง</h2>
+          </div>
+          <span class="text-3xl">🍳</span>
+        </div>
+
+        <!-- วัตถุดิบที่ต้องใช้ -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-800 mb-2">🛒 วัตถุดิบที่ต้องเตรียม:</h3>
+          <ul id="resIngredients" class="list-disc list-inside text-sm text-slate-600 space-y-1 bg-amber-50/50 p-4 rounded-xl">
+            <li>หมูสับ 150 กรัม</li>
+            <li>ใบกะเพรา 1 กำมือ</li>
+          </ul>
+        </div>
+
+        <!-- ขั้นตอนการทำ -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-800 mb-2">🔥 ขั้นตอนการทำ:</h3>
+          <ol id="resSteps" class="list-decimal list-inside text-sm text-slate-600 space-y-2 bg-slate-50 p-4 rounded-xl">
+            <li>ตั้งกระทะใส่น้ำมันให้ร้อน เจียวพริกกับกระเทียมให้หอม</li>
+            <li>ใส่หมูสับลงไปผัดจนสุก ปรุงรสด้วยซอสหอยนางรม น้ำปลา และน้ำตาล</li>
+          </ol>
+        </div>
+
+        <!-- เคล็ดลับความอร่อย -->
+        <div class="bg-amber-50 p-4 rounded-xl border border-amber-200/60">
+          <p class="text-xs font-bold text-amber-800">💡 เคล็ดลับความอร่อยจากเชฟ AI:</p>
+          <p id="resTip" class="text-xs text-amber-700 mt-1">ใส่น้ำซุปหรือน้ำสะอาดเล็กน้อยตอนผัด เพื่อไม่ให้กะเพราแห้งเกินไป</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ข้อมูลจำลองสำรองไว้ใช้ตอนเรียก API ไม่สำเร็จ (มีครบทุกประเภทอาหาร)
+    const mockRecipes = [
+      {
+        title: "ข้าวผัดไข่ใส่หมูสับทรงเครื่อง",
+        category: "อาหารจานเดียว ทำง่ายๆ",
+        ingredients: ["ข้าวสวย 1 ถ้วย", "ไข่ไก่ 2 ฟอง", "หมูสับ 100 กรัม", "กระเทียมสับ 1 ช้อนชา", "ซอสปรุงรส, น้ำตาล, พริกไทย"],
+        steps: [
+          "ตั้งกระทะใส่น้ำมัน เจียวกระเทียมสับจนหอม ใส่หมูสับลงไปผัดจนเริ่มสุก",
+          "ตอกไข่ไก่ลงไป ยีให้ไข่พอสุก แล้วใส่ข้าวสวยลงไปผัดให้เข้ากัน",
+          "ปรุงรสด้วยซอสปรุงรส น้ำตาล พริกไทย ผัดด้วยไฟแรงจนหอมกลิ่นกระทะ พร้อมเสิร์ฟ"
+        ],
+        tip: "ใช้ข้าวสวยค้างคืนที่แช่เย็นไว้ จะทำให้ข้าวผัดเป็นเม็ดสวย ไม่แฉะ"
+      },
+      {
+        title: "ต้มจืดเต้าหู้หมูสับไข่น้ำ",
+        category: "ต้ม/แกง ร้อนๆ",
+        ingredients: ["ไข่ไก่ 2 ฟอง", "หมูสับ 100 กรัม", "ซุปก้อน 1 ก้อน", "ผักกาดขาว/ต้นหอม", "ซีอิ๊วขาว, พริกไทย"],
+        steps: [
+          "ทอดไข่เจียวให้หอมกรอบ แล้วหั่นเป็นชิ้นพอดีคำพักไว้",
+          "ตั้งน้ำใส่ซุปก้อน ปรุงรสด้วยซีอิ๊วขาว เมื่อน้ำเดือดใส่หมูสับปั้นก้อนลงไป",
+          "ใส่ผักและไข่เจียวที่หั่นไว้ ต้มต่ออีก 2 นาที โรยพริกไทยพร้อมเสิร์ฟ"
+        ],
+        tip: "การนำไข่ไปทอดก่อนต้ม จะทำให้น้ำซุปมีความหอมกลมกล่อมมากยิ่งขึ้น"
+      },
+      {
+        title: "ผัดกะเพราหมูสับไข่ดาว",
+        category: "ผัด/ทอด รสเด็ด",
+        ingredients: ["หมูสับ 150 กรัม", "ใบกะเพรา 1 กำมือ", "พริกขี้หนู 5 เม็ด", "กระเทียม 4 กลีบ", "ไข่ไก่ 1 ฟอง", "ซอสหอยนางรม, น้ำปลา, น้ำตาล"],
+        steps: [
+          "ทอดไข่ดาวในน้ำมันร้อนจัดให้ขอบกรอบ ตักพักไว้",
+          "โขลกพริกกับกระเทียมพอแหลก ลงไปผัดกับน้ำมันจนหอม",
+          "ใส่หมูสับผัดจนสุก ปรุงรสด้วยซอสหอยนางรม น้ำปลา น้ำตาล",
+          "ใส่ใบกะเพรา ผัดเร็วๆ แล้วปิดไฟ ตักราดข้าวพร้อมไข่ดาว"
+        ],
+        tip: "ใส่น้ำซุปหรือน้ำสะอาดเล็กน้อยตอนผัด เพื่อไม่ให้กะเพราแห้งเกินไป"
+      },
+      {
+        title: "สลัดอกไก่ไข่ต้มน้ำใสจี๊ด",
+        category: "อาหารคลีน สุขภาพ",
+        ingredients: ["อกไก่ 1 ชิ้น", "ไข่ไก่ 1 ฟอง", "ผักสลัดรวม 2 ถ้วย", "มะเขือเทศเชอร์รี่ 5 ลูก", "น้ำมะนาว, น้ำปลา, พริกป่น"],
+        steps: [
+          "ต้มอกไก่ในน้ำเดือด 12-15 นาทีจนสุก พักให้เย็นแล้วฉีกเป็นเส้น",
+          "ต้มไข่ 8 นาที แช่น้ำเย็น ปอกเปลือกแล้วผ่าครึ่ง",
+          "ผสมน้ำมะนาว น้ำปลา พริกป่น เป็นน้ำสลัด",
+          "จัดผัก อกไก่ ไข่ และมะเขือเทศลงจาน ราดน้ำสลัดก่อนกิน"
+        ],
+        tip: "น้ำสลัดแบบไทยใช้น้ำมันน้อยมาก แคลอรีต่ำกว่าน้ำสลัดครีมหลายเท่า"
+      }
+    ];
+
+    async function generateRecipe() {
+      const ingredients = document.getElementById('ingredientsInput').value.trim();
+      const mealType = document.getElementById('mealType').value;
+
+      if (!ingredients) {
+        alert("กรุณากรอกวัตถุดิบที่คุณมีในตู้เย็นก่อนครับ");
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      const loadingState = document.getElementById('loadingState');
+      const resultCard = document.getElementById('resultCard');
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      loadingState.classList.remove('hidden');
+      resultCard.classList.add('hidden');
+
+      // เรียก Serverless Function ของเราเอง (api/recipe.js) ซึ่งถือ Gemini API Key ไว้ฝั่งเซิร์ฟเวอร์
+      try {
+        const response = await fetch('/api/recipe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ingredients, mealType })
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
+
+        renderResult(data.title, data.category, data.ingredients, data.steps, data.tip);
+
+      } catch (err) {
+        console.error(err);
+        alert(`เกิดข้อผิดพลาดในการเชื่อมต่อ API (${err.message})\nสลับมาใช้โหมดจำลองให้ครับ`);
+        const recipe = pickMockRecipe(mealType);
+        renderResult(recipe.title, recipe.category, recipe.ingredients, recipe.steps, recipe.tip);
+      } finally {
+        finishLoading();
+      }
+    }
+
+    function pickMockRecipe(mealType) {
+      return mockRecipes.find(r => r.category === mealType) || mockRecipes[0];
+    }
+
+    // ใช้ textContent แทน innerHTML เพื่อกันโค้ดแปลกๆ จากคำตอบ AI ถูกรันบนหน้าเว็บ
+    function fillList(listId, items) {
+      const list = document.getElementById(listId);
+      list.replaceChildren(...(items || []).map(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        return li;
+      }));
+    }
+
+    function renderResult(title, category, ingredients, steps, tip) {
+      document.getElementById('resTitle').textContent = title;
+      document.getElementById('resCategory').textContent = category;
+      fillList('resIngredients', ingredients);
+      fillList('resSteps', steps);
+      document.getElementById('resTip').textContent = tip;
+      document.getElementById('resultCard').classList.remove('hidden');
+    }
+
+    function finishLoading() {
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('submitBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+      document.getElementById('loadingState').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
