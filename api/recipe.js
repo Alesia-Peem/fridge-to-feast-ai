@@ -2,7 +2,9 @@
 // เก็บ Gemini API Key ไว้ฝั่งเซิร์ฟเวอร์ (Environment Variable ชื่อ GEMINI_API_KEY บน Vercel)
 // ผู้ใช้หน้าเว็บจึงไม่เห็น key และไม่ต้องกรอกเอง
 
-const GEMINI_MODEL = 'gemini-flash-latest';
+// ถ้ารุ่นแรกคนใช้เยอะจนล้น (503) หรือโควตาเต็ม (429) จะลองรุ่น lite ต่อให้อัตโนมัติ
+const GEMINI_MODELS = ['gemini-flash-latest', 'gemini-flash-lite-latest'];
+const RETRY_STATUSES = [429, 500, 503];
 const MEAL_TYPES = ['อาหารจานเดียว ทำง่ายๆ', 'ต้ม/แกง ร้อนๆ', 'ผัด/ทอด รสเด็ด', 'อาหารคลีน สุขภาพ'];
 
 module.exports = async function handler(req, res) {
@@ -17,14 +19,15 @@ module.exports = async function handler(req, res) {
 
   // จำกัดอินพุต กันคนเอา API Key ของเราไปใช้ถามเรื่องอื่น
   const { ingredients, mealType } = req.body || {};
-  if (typeof ingredients !== 'string' || !ingredients.trim() || ingredients.length > 200) {
-    return res.status(400).json({ error: 'กรุณาระบุวัตถุดิบ (ไม่เกิน 200 ตัวอักษร)' });
+  if (typeof ingredients !== 'string' || !ingredients.trim() || ingredients.length > 500) {
+    return res.status(400).json({ error: 'กรุณาระบุวัตถุดิบ (ไม่เกิน 500 ตัวอักษร)' });
   }
   if (!MEAL_TYPES.includes(mealType)) {
     return res.status(400).json({ error: 'ประเภทอาหารไม่ถูกต้อง' });
   }
 
-  const promptText = `คุณคือเชฟมืออาชีพ ช่วยคิดเมนูอาหารจากวัตถุดิบที่มี: "${ingredients.trim()}" ประเภท: "${mealType}"
+  const promptText = `คุณคือเชฟมืออาชีพ ช่วยคิดเมนูอาหาร 1 เมนูจากวัตถุดิบในตู้เย็น: "${ingredients.trim()}" ประเภท: "${mealType}"
+ไม่จำเป็นต้องใช้ครบทุกอย่าง ให้ใช้วัตถุดิบที่ระบุว่า (ใกล้หมดอายุ) ก่อน และถือว่ามีเครื่องปรุงพื้นฐานอยู่แล้ว
 ตอบเป็น JSON เท่านั้น โครงสร้าง:
 {
   "title": "ชื่อเมนู",
@@ -35,16 +38,20 @@ module.exports = async function handler(req, res) {
 }`;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { responseMimeType: 'application/json' }
-      })
-    });
+    let response, data;
+    for (const model of GEMINI_MODELS) {
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: { responseMimeType: 'application/json' }
+        })
+      });
+      data = await response.json();
+      if (!RETRY_STATUSES.includes(response.status)) break;
+    }
 
-    const data = await response.json();
     if (!response.ok) {
       return res.status(502).json({ error: data.error?.message || `Gemini HTTP ${response.status}` });
     }
