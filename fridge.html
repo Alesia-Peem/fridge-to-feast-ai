@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ตู้เย็นของฉัน · Fridge-to-Feast</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍳</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body data-page="fridge">
+  <main class="wrap">
+    <nav class="top">
+      <a class="brand" href="/">🍳 Fridge-to-Feast</a>
+      <div class="top-links">
+        <a href="/fridge" aria-current="page">ตู้เย็น</a>
+        <a href="/history">ประวัติ</a>
+      </div>
+    </nav>
+
+    <h1>ตู้เย็นของฉัน</h1>
+    <p class="lead">เพิ่มวัตถุดิบที่มี เลือกสิ่งที่อยากใช้ แล้วให้ AI คิดเมนู</p>
+
+    <form id="addForm" class="add" autocomplete="off">
+      <input class="name" type="text" id="itemName" placeholder="เพิ่มวัตถุดิบ เช่น ไข่ไก่" maxlength="40" required aria-label="ชื่อวัตถุดิบ">
+      <input type="date" id="itemExpiry" aria-label="วันหมดอายุ (ไม่บังคับ)" title="วันหมดอายุ (ไม่บังคับ)">
+      <button class="btn" type="submit">เพิ่ม</button>
+    </form>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>ในตู้เย็น<span class="count" id="count"></span></h2>
+        <button class="link" type="button" id="toggleAll">เลือกทั้งหมด</button>
+      </div>
+      <ul class="list" id="fridgeList"></ul>
+      <p class="empty" id="emptyFridge" hidden>ตู้เย็นยังว่างอยู่ ลองเพิ่มวัตถุดิบด้านบน</p>
+    </section>
+
+    <section class="generate">
+      <div>
+        <label class="label" for="mealType">ประเภทอาหาร</label>
+        <select id="mealType">
+          <option value="อาหารจานเดียว ทำง่ายๆ">อาหารจานเดียว ทำง่าย (ไม่เกิน 15 นาที)</option>
+          <option value="ต้ม/แกง ร้อนๆ">ต้ม / แกงร้อนๆ</option>
+          <option value="ผัด/ทอด รสเด็ด">ผัด / ทอด รสเด็ด</option>
+          <option value="อาหารคลีน สุขภาพ">อาหารคลีน / แคลอรีต่ำ</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-block" type="button" id="generateBtn">คิดเมนูจากวัตถุดิบที่เลือก</button>
+      <p class="hint" id="hint"></p>
+    </section>
+
+    <div class="loading" id="loading" hidden>
+      <span class="spinner"></span> เชฟ AI กำลังคิดเมนูให้คุณ...
+    </div>
+
+    <article class="card" id="result" hidden></article>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

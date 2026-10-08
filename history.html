@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ประวัติการประกอบอาหาร · Fridge-to-Feast</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍳</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body data-page="history">
+  <main class="wrap">
+    <nav class="top">
+      <a class="brand" href="/">🍳 Fridge-to-Feast</a>
+      <div class="top-links">
+        <a href="/fridge">ตู้เย็น</a>
+        <a href="/history" aria-current="page">ประวัติ</a>
+      </div>
+    </nav>
+
+    <a class="back" href="/fridge">← กลับไปตู้เย็น</a>
+    <h1>ประวัติการประกอบอาหาร</h1>
+
+    <div class="banner">
+      <span aria-hidden="true">🌱</span>
+      <p><strong>Food Waste Saved:</strong> คุณประกอบอาหารและเคลียร์วัตถุดิบไปแล้วทั้งหมด <strong id="mealCount">0</strong> เมนู · <strong id="clearedCount">0</strong> วัตถุดิบ</p>
+    </div>
+
+    <div id="historyList"></div>
+    <p class="empty" id="emptyHistory" hidden>ยังไม่มีประวัติ — <a href="/fridge">ไปที่ตู้เย็น</a> เพื่อเริ่มทำเมนูแรก</p>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
